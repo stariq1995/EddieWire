@@ -1,0 +1,18 @@
+#!/bin/sh
+
+if [ $# != 4 ] ; then
+ echo "$0 <wifi/bluetooth> <address of server> <bufferSize> <runs>"
+ exit
+fi
+
+for run in A B C D E
+do
+    echo Trasferring files $run
+    for counter in $(seq 1 $4)
+    do
+        echo Sending $run-$counter
+        ./bin/transfer tests/$run $1 $2 $3 no-checksum
+        sleep 1
+    done 
+done
+echo done all.

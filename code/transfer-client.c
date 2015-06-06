@@ -119,19 +119,21 @@ int main(int argc, char **argv) {
 	 * checksum appended to the end of the buffer
 	 */
 	writeBytes = read(fileFD, buf, chunkSize);
-	unsigned short *checksum = (unsigned short *)(buf + writeBytes);
+	union csum checksum;
 	char replyBuf[10];
     while (writeBytes > 0) {
 		if (errorCheck) {
-			*checksum = check_sum((unsigned short *)buf, writeBytes);
-        	status = write(serverFD, buf, writeBytes + sizeof(unsigned short));
+			checksum.i = check_sum((unsigned short *)buf, writeBytes);
+			buf[writeBytes] = checksum.c[0];
+			buf[writeBytes+1] = checksum.c[1];
+        	status = write(serverFD, buf, writeBytes + 2);
 			if (status < 0) perror("Sending Error:");
 			
 			status = read(serverFD, replyBuf, sizeof(replyBuf));
 			if (status < 0) perror("Reading reply error:");
 			while(!strcmp(replyBuf, "NO")){
 				printf("Retransmitting corrupted packet\n");
-				status = write(serverFD, buf, writeBytes + sizeof(unsigned short));
+				status = write(serverFD, buf, writeBytes + 2);
 				if (status < 0) perror("Sending Error:");
 			}
 			
@@ -140,8 +142,7 @@ int main(int argc, char **argv) {
 			if (status < 0) perror("Sending Error:");
 		}
         writeBytes = read(fileFD, buf, chunkSize);
-		checksum = (unsigned short *)(buf + writeBytes);
-    }
+	}
 	
 	if(writeBytes < 0) perror("Reading Error:");
 	

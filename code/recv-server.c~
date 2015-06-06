@@ -131,24 +131,26 @@ int main(int argc, char **argv) {
 		if (errorCheck){
 			char *OK = "OK";
 			char *NO = "NO";
-			unsigned short checkS;
+			union csum checkS;
 
 		    while (readBytes > 0 && size < insize) {
-				readBytes = read(clientFD, buf, chunkSize + sizeof(unsigned short));
-				readBytes -= sizeof(unsigned short);
+				readBytes = read(clientFD, buf, chunkSize + 2);
+				readBytes -= 2;
 				if (readBytes < 0) perror("Error receiving:");
 				/* 
 				 * Checking chunk and reacting accordingly 
 				 */
-				checkS = *((unsigned short *)(buf + readBytes));
+				checkS.c[0] = buf[readBytes];
+				chackS.c[1] = buf[readBytes+1];
 				
-				if ( checkS == check_sum((unsigned short *)buf, readBytes)){
+				if (checkS.i == check_sum((unsigned short *)buf, readBytes)){
 					status = fwrite(buf, sizeof(char), readBytes, ofile);
 		        	if (status < 0) perror ("Error writing to file:");
 					status = write(clientFD, OK, sizeof(OK));
 					if (status < 0) perror ("Error sending reply:");
 					size += readBytes;
 				} else {
+					printf("Should be %d but calculated %d", checkS.i, check_sum((unsigned short *)buf, readBytes));
 					printf("Packet corrupted!\n");
 					return -1;
 					status = write(clientFD, NO, sizeof(NO));

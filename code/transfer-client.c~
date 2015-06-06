@@ -119,12 +119,15 @@ int main(int argc, char **argv) {
 	 * checksum appended to the end of the buffer
 	 */
 	writeBytes = read(fileFD, buf, chunkSize);
-	unsigned short *checksum = (unsigned short *)(buf + writeBytes);
+	unsigned short checksum;
 	char replyBuf[10];
     while (writeBytes > 0) {
 		if (errorCheck) {
-			*checksum = check_sum((unsigned short *)buf, writeBytes);
-        	status = write(serverFD, buf, writeBytes + sizeof(unsigned short));
+			checksum = check_sum((unsigned short *)buf, writeBytes);
+        	status = write(serverFD, buf, writeBytes);
+			printf("[%i] %d\n", status, checksum);
+			status = write(serverFD, &checksum, sizeof(unsigned short));
+			printf("[%i] %d\n", status, checksum);
 			if (status < 0) perror("Sending Error:");
 			
 			status = read(serverFD, replyBuf, sizeof(replyBuf));
@@ -140,8 +143,7 @@ int main(int argc, char **argv) {
 			if (status < 0) perror("Sending Error:");
 		}
         writeBytes = read(fileFD, buf, chunkSize);
-		checksum = (unsigned short *)(buf + writeBytes);
-    }
+	}
 	
 	if(writeBytes < 0) perror("Reading Error:");
 	

@@ -15,10 +15,4 @@
 #include <time.h>
 #include <unistd.h>
 
-union csum
-{
-   unsigned short i;
-   char c[2]; 
-} csum;  
-
 #endif
