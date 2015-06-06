@@ -1,0 +1,14 @@
+all: code/recv-server.c code/transfer-client.c
+	rm -rf bin
+	mkdir bin
+	mkdir tmp
+	gcc -o bin/recv code/recv-server.c -lbluetooth
+	gcc -o bin/transfer code/transfer-client.c -lbluetooth
+
+server: code/recv-server.c
+	mkdir tmp
+	gcc -o bin/recv code/recv-server.c -lbluetooth
+
+client: code/transfer-client.c
+	gcc -o bin/transfer code/transfer-client.c -lbluetooth
+	
