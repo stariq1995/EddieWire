@@ -51,7 +51,7 @@ int main(int argc, char **argv) {
 	} else if (!strcmp(argv[5],"no-checksum")){
 		buf = (char *)malloc(sizeof(char)*chunkSize);
 		errorCheck = 0;
-	} else if (!strcmp(argv[5],"no-checksum")){
+	} else if (!strcmp(argv[5],"checksum")){
 		buf = (char *)malloc(sizeof(char)*chunkSize + sizeof(unsigned short));
 		errorCheck = 1;
 	} else {
@@ -120,20 +120,30 @@ int main(int argc, char **argv) {
 	 */
 	writeBytes = read(fileFD, buf, chunkSize);
 	unsigned short *checksum = (unsigned short *)(buf + writeBytes);
+	char replyBuf[10];
     while (writeBytes > 0) {
 		if (errorCheck) {
 			*checksum = check_sum((unsigned short *)buf, writeBytes);
         	status = write(serverFD, buf, writeBytes + sizeof(unsigned short));
+			if (status < 0) perror("Sending Error:");
+			
+			status = read(serverFD, replyBuf, sizeof(replyBuf));
+			if (status < 0) perror("Reading reply error:");
+			while(!strcmp(replyBuf, "NO")){
+				printf("Retransmitting corrupted packet\n");
+				status = write(serverFD, buf, writeBytes + sizeof(unsigned short));
+				if (status < 0) perror("Sending Error:");
+			}
+			
 		} else {
 			status = write(serverFD, buf, writeBytes);
+			if (status < 0) perror("Sending Error:");
 		}
-        if (status) perror("Sending Error:");
-        return -1;
         writeBytes = read(fileFD, buf, chunkSize);
 		checksum = (unsigned short *)(buf + writeBytes);
     }
 	
-	if(writeBytes < 0) perror("Sending Error:");
+	if(writeBytes < 0) perror("Reading Error:");
 	
 	/* 
 	 * Cleanup and close, make sure not to close the serverFD to protect
