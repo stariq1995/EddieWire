@@ -162,8 +162,8 @@ int main(int argc, char **argv) {
 		} else {
 		    while (readBytes > 0 && size < insize) {
 			readBytes = read(clientFD, buf, sizeof(buf));
-			while (readBytes != chunkSize + 2){        
-                            readBytes += read(clientFD, buf+readBytes, chunkSize);
+			while (readBytes != chunkSize){        
+                            readBytes += read(clientFD, buf+readBytes, chunkSize-readBytes);
                         } 
 			size += readBytes;
 		        status = fwrite(buf, sizeof(char), readBytes, ofile);
