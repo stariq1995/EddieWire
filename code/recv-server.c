@@ -135,8 +135,10 @@ int main(int argc, char **argv) {
 
 		    while (readBytes > 0 && size < insize) {
 				readBytes = read(clientFD, buf, chunkSize + 2);
+				while (readBytes != chunkSize + 2){
+				    readBytes += read(clientFD, buf+readBytes, chunkSize-readBytes+2);
+				}
 				readBytes -= 2;
-				if (readBytes < 0) perror("Error receiving:");
 				/* 
 				 * Checking chunk and reacting accordingly 
 				 */
@@ -150,21 +152,22 @@ int main(int argc, char **argv) {
 					if (status < 0) perror ("Error sending reply:");
 					size += readBytes;
 				} else {
-					printf("Should be %d but calculated %d", checkS.i, check_sum((unsigned short *)buf, readBytes));
+					printf("Should be %d for [%i] but calculated %d\n", checkS.i, readBytes, check_sum((unsigned short *)buf, readBytes));
 					printf("Packet corrupted!\n");
-					return -1;
+					//return -1;
 					status = write(clientFD, NO, sizeof(NO));
 					if (status < 0) perror ("Error sending reply:");
 				}
 		    }
 		} else {
-			readBytes = read(clientFD, buf, chunkSize);
-		    size += readBytes;
 		    while (readBytes > 0 && size < insize) {
+			readBytes = read(clientFD, buf, chunkSize);
+			while (readBytes != chunkSize){        
+                            readBytes += read(clientFD, buf+readBytes, chunkSize-readBytes);
+                        } 
+			size += readBytes;
 		        status = fwrite(buf, sizeof(char), readBytes, ofile);
 		        if (status < 0) perror ("Error writing:");
-		        readBytes = read(clientFD, buf, sizeof(buf));
-		        size += readBytes;
 		    }
 		    if (readBytes<0) perror("Error receiving:");
 		}
