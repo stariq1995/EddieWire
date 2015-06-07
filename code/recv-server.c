@@ -161,7 +161,7 @@ int main(int argc, char **argv) {
 		    }
 		} else {
 		    while (readBytes > 0 && size < insize) {
-			readBytes = read(clientFD, buf, sizeof(buf));
+			readBytes = read(clientFD, buf, chunkSize);
 			while (readBytes != chunkSize){        
                             readBytes += read(clientFD, buf+readBytes, chunkSize-readBytes);
                         } 
