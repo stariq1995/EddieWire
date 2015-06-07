@@ -141,7 +141,7 @@ int main(int argc, char **argv) {
 				 * Checking chunk and reacting accordingly 
 				 */
 				checkS.c[0] = buf[readBytes];
-				chackS.c[1] = buf[readBytes+1];
+				checkS.c[1] = buf[readBytes+1];
 				
 				if (checkS.i == check_sum((unsigned short *)buf, readBytes)){
 					status = fwrite(buf, sizeof(char), readBytes, ofile);

@@ -135,6 +135,8 @@ int main(int argc, char **argv) {
 				printf("Retransmitting corrupted packet\n");
 				status = write(serverFD, buf, writeBytes + 2);
 				if (status < 0) perror("Sending Error:");
+				status = read(serverFD, replyBuf, sizeof(replyBuf));
+				if (status < 0) perror("Reading reply error:");
 			}
 			
 		} else {
