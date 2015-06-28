@@ -15,4 +15,12 @@
 #include <time.h>
 #include <unistd.h>
 
+#include "GSelect.h"
+
+union csum
+{
+   unsigned short i;
+   char c[2]; 
+} csum;  
+
 #endif

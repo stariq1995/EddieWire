@@ -1,0 +1,50 @@
+/** @file recv-server.c
+ *  @brief the server used for testing data transfer
+ *  
+ *
+ *  @author Aliaa Essameldin <aeahmed@qatar.cmu.edu>
+ */
+
+#include "common.h"
+
+unsigned short check_sum (unsigned short *buffer, int size);
+int listenFD_callback (POOL *pool, int fd, void *state);
+
+int main(int argc, char **argv) {
+    char buf[1024] = { 0 };
+    int sock, size, status;
+    struct sockaddr_in addr = { 0 };
+
+    /*
+     * starting the socket with TCP	
+     */
+    sock = socket(AF_INET, SOCK_STREAM, 0);
+
+    /*
+     * bind socket to port 8888 of the first available
+     * network interface
+     */
+    addr.sin_addr.s_addr = htons(INADDR_ANY);
+    addr.sin_port = htons(8888);
+    bind(sock, (struct sockaddr *)&addr, sizeof(addr));
+
+   /*
+	* put socket into listening mode - THIS IS BLOCKING
+ 	*/
+    printf("Server running in %s mode..\n", argv[1]);
+    listen(sock, 10);
+   
+    /* 
+     * Initialize and setup the Select Pool
+     */
+    POOL main_pool = new_pool()
+    add_fd(&main_pool, sock, &listenFD_callback, NULL);
+	
+   	while(1) {
+        GSelect(&main_pool);
+    }
+}
+
+int listenFD_callback (POOL *pool, int fd, void *state) {
+    
+}

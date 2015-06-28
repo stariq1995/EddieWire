@@ -118,15 +118,17 @@ int main(int argc, char **argv) {
 	 * Sending the files in chunks of size ChunkSize, either raw or with the
 	 * checksum appended to the end of the buffer
 	 */
+	int total; 
 	writeBytes = read(fileFD, buf, chunkSize);
 	union csum checksum;
 	char replyBuf[10];
-    while (writeBytes > 0) {
+	int x = writeBytes;
+        while (writeBytes > 0) {
 		if (errorCheck) {
 			checksum.i = check_sum((unsigned short *)buf, writeBytes);
 			buf[writeBytes] = checksum.c[0];
 			buf[writeBytes+1] = checksum.c[1];
-        	status = write(serverFD, buf, writeBytes + 2);
+        	        status = write(serverFD, buf, writeBytes + 2);
 			if (status < 0) perror("Sending Error:");
 			
 			status = read(serverFD, replyBuf, sizeof(replyBuf));
@@ -143,7 +145,10 @@ int main(int argc, char **argv) {
 			status = write(serverFD, buf, writeBytes);
 			if (status < 0) perror("Sending Error:");
 		}
-        writeBytes = read(fileFD, buf, chunkSize);
+                writeBytes = read(fileFD, buf, chunkSize);
+		x+=writeBytes; 
+		printf("X: %i\n", x);
+		
 	}
 	
 	if(writeBytes < 0) perror("Reading Error:");

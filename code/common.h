@@ -15,6 +15,9 @@
 #include <time.h>
 #include <unistd.h>
 
+#include "GSelect.h"
+#include "list.h"
+
 union csum
 {
    unsigned short i;
