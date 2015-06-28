@@ -147,7 +147,7 @@ int main(int argc, char **argv) {
 		}
                 writeBytes = read(fileFD, buf, chunkSize);
 		x+=writeBytes; 
-		printf("X: %i\n", x);
+		//printf("X: %i\n", x);
 		
 	}
 	
