@@ -157,6 +157,7 @@ int main(int argc, char **argv) {
 	 * Cleanup and close, make sure not to close the serverFD to protect
 	 * last packet (??)
 	 */
+	sleep(2)
     close(fileFD);
     free(buf);
     return 0;
