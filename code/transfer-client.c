@@ -14,6 +14,8 @@
 
 #include "common.h"
 
+
+#define SERVER_PORT 8888
 unsigned short check_sum (unsigned short *buffer, int size); 
 
 int main(int argc, char **argv) {
@@ -73,7 +75,7 @@ int main(int argc, char **argv) {
         serverFD = socket(AF_INET, SOCK_STREAM, 0);
 		struct sockaddr_in addr = { 0 };
         addr.sin_family = AF_INET;
-        addr.sin_port = htons(8888);
+        addr.sin_port = htons(SERVER_PORT);
         inet_pton(AF_INET, argv[3], &addr.sin_addr);
 		
 		status = connect(serverFD, (struct sockaddr *)&addr, sizeof(addr));

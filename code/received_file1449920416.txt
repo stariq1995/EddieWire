@@ -12,11 +12,8 @@
  */
 
 #include "common.h"
-#include <sys/time.h>
 
 unsigned short check_sum (unsigned short *buffer, int size); 
-
-#define LISTEN_PORT 8889
 
 int main(int argc, char **argv) {
 	/* 
@@ -66,7 +63,7 @@ int main(int argc, char **argv) {
 		 */
 		struct sockaddr_in addr = { 0 };
         addr.sin_addr.s_addr = htons(INADDR_ANY);
-        addr.sin_port = htons(LISTEN_PORT);
+        addr.sin_port = htons(8888);
         bind(sock, (struct sockaddr *)&addr, sizeof(addr));	
 	} else {
 		printf("Invalid argument %s\n", argv[1]);
@@ -86,7 +83,7 @@ int main(int argc, char **argv) {
 	 */
 	while(id >= 0){
 		id++;
-		struct timeval startTime, endTime;
+		time_t startTime, endTime;
         double delay;
 
 		/* 
@@ -121,7 +118,7 @@ int main(int argc, char **argv) {
         sprintf(filename, "tmp/%i", id);
         ofile = fopen(filename, "w");
         if (ofile == NULL) perror ("Error Opening file:");
-		gettimeofday(&startTime, NULL);
+		time(&startTime);
 
 		/* 
 		 * Reading/writing behavior changes according to whether there is a checksum. 
@@ -169,7 +166,6 @@ int main(int argc, char **argv) {
                             readBytes += read(clientFD, buf+readBytes, chunkSize-readBytes);
                         } 
 			size += readBytes;
-			//printf("size : %d, readbytes: %d\n", size, readBytes);
 		        status = fwrite(buf, sizeof(char), readBytes, ofile);
 		        if (status < 0) perror ("Error writing:");
 		    }
@@ -179,9 +175,9 @@ int main(int argc, char **argv) {
 		/* 
 		 * Done receiving data, stop timer and calculate delay
 		 */
-        gettimeofday(&endTime, NULL);
-        delay = ((endTime.tv_sec * 1000000) + (endTime.tv_usec)) - ((startTime.tv_sec * 1000000) + (startTime.tv_usec));
-        fprintf(log, "%i: %i %f\n", id, size, delay);
+        time(&endTime);
+        delay = difftime(endTime, startTime);
+        fprintf(log, "%i: %i %f\n", id, size, delay*1000);
         fclose(ofile);
         fclose(log);
 

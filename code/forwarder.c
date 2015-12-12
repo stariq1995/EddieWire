@@ -31,8 +31,11 @@
 #include <resolv.h>
 #include <arpa/inet.h>
 #include <errno.h>
+#include <stdlib.h>
+#include <string.h>
 
-#define MY_PORT		8888
+#define LISTEN_PORT		8888
+#define CONNECT_PORT 8889
 #define MAXBUF		1024
 
 int main(int Count, char *Strings[])
@@ -53,7 +56,7 @@ int main(int Count, char *Strings[])
 	/*---Initialize address/port structure---*/
 	bzero(&self, sizeof(self));
 	self.sin_family = AF_INET;
-	self.sin_port = htons(MY_PORT);
+	self.sin_port = htons(LISTEN_PORT);
 	self.sin_addr.s_addr = INADDR_ANY;
 
 	/*---Assign a port number to the socket---*/
@@ -63,19 +66,7 @@ int main(int Count, char *Strings[])
 		exit(errno);
 	}
 
-	serverFD = socket(AF_INET, SOCK_STREAM, 0);
-	struct sockaddr_in addr = { 0 };
-	addr.sin_family = AF_INET;
-	addr.sin_port = htons(MY_PORT);
-	inet_pton(AF_INET, Strings[1], &addr.sin_addr);
 
-	status = connect(serverFD, (struct sockaddr *)&addr, sizeof(addr));
-	while (status < 0){
-		perror("Connection failure, retrying in 1 sec..");
-		sleep(1);
-		serverFD = socket(AF_INET, SOCK_STREAM, 0);
-		status = connect(serverFD, (struct sockaddr *)&addr, sizeof(addr));
-	}
 
 	/*---Make it a "listening socket"---*/
 	if ( listen(sockfd, 20) != 0 )
@@ -94,6 +85,7 @@ int main(int Count, char *Strings[])
 		/*---accept a connection (creating a data pipe)---*/
 		clientfd = accept(sockfd, (struct sockaddr*)&client_addr, &addrlen);
 		printf("%s:%d connected\n", inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
+		serverFD = connect_to_server(Strings[1]);
 
 		while((n = recv(clientfd, buffer, MAXBUF, 0)) != 0) {
 
@@ -108,4 +100,23 @@ int main(int Count, char *Strings[])
 	/*---Clean up (should never get here!)---*/
 	close(sockfd);
 	return 0;
+}
+
+int connect_to_server(char *address) {
+	int serverFD, status;
+	
+	serverFD = socket(AF_INET, SOCK_STREAM, 0);
+	struct sockaddr_in addr = { 0 };
+	addr.sin_family = AF_INET;
+	addr.sin_port = htons(CONNECT_PORT);
+	inet_pton(AF_INET, address, &addr.sin_addr);
+
+	status = connect(serverFD, (struct sockaddr *)&addr, sizeof(addr));
+	while (status < 0) {
+		perror("Connection failure, retrying in 1 sec..");
+		sleep(1);
+		serverFD = socket(AF_INET, SOCK_STREAM, 0);
+		status = connect(serverFD, (struct sockaddr *)&addr, sizeof(addr));
+	}
+	return serverFD;
 }
