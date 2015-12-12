@@ -5,7 +5,7 @@ if [ $# != 4 ] ; then
  exit
 fi
 
-for run in D E
+for run in A B C D E
 do
     echo Trasferring files $run
     for counter in $(seq 1 $4)

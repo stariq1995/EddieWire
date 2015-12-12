@@ -143,6 +143,7 @@ int main(int argc, char **argv) {
 			
 		} else {
 			status = write(serverFD, buf, writeBytes);
+			//printf("writeBytes : %d, status : %d\n", writeBytes, status);
 			if (status < 0) perror("Sending Error:");
 		}
                 writeBytes = read(fileFD, buf, chunkSize);
