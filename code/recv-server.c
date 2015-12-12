@@ -12,6 +12,7 @@
  */
 
 #include "common.h"
+#include <sys/time.h>
 
 unsigned short check_sum (unsigned short *buffer, int size); 
 
@@ -83,7 +84,7 @@ int main(int argc, char **argv) {
 	 */
 	while(id >= 0){
 		id++;
-		time_t startTime, endTime;
+		struct timeval startTime, endTime;
         double delay;
 
 		/* 
@@ -118,7 +119,7 @@ int main(int argc, char **argv) {
         sprintf(filename, "tmp/%i", id);
         ofile = fopen(filename, "w");
         if (ofile == NULL) perror ("Error Opening file:");
-		time(&startTime);
+		gettimeofday(&startTime, NULL);
 
 		/* 
 		 * Reading/writing behavior changes according to whether there is a checksum. 
@@ -166,6 +167,7 @@ int main(int argc, char **argv) {
                             readBytes += read(clientFD, buf+readBytes, chunkSize-readBytes);
                         } 
 			size += readBytes;
+			//printf("size : %d, readbytes: %d\n", size, readBytes);
 		        status = fwrite(buf, sizeof(char), readBytes, ofile);
 		        if (status < 0) perror ("Error writing:");
 		    }
@@ -175,9 +177,9 @@ int main(int argc, char **argv) {
 		/* 
 		 * Done receiving data, stop timer and calculate delay
 		 */
-        time(&endTime);
-        delay = difftime(endTime, startTime);
-        fprintf(log, "%i: %i %f\n", id, size, delay*1000);
+        gettimeofday(&endTime, NULL);
+        delay = ((endTime.tv_sec * 1000000) + (endTime.tv_usec)) - ((startTime.tv_sec * 1000000) + (startTime.tv_usec));
+        fprintf(log, "%i: %i %f\n", id, size, delay);
         fclose(ofile);
         fclose(log);
 
