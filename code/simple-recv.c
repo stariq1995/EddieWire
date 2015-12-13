@@ -167,7 +167,7 @@ int main(int argc, char **argv) {
 			readBytes = read(clientFD, buf, chunkSize);
 			// printf("read bytes before loop : %d\n", readBytes);
 			if (readBytes == 0) {
-				perror("closed connection before complete")
+				perror("closed connection before complete");
 			}
 			size += readBytes;
 			printf("size : %d, readbytes: %d\n", size, readBytes);
