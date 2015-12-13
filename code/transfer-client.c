@@ -113,9 +113,10 @@ int main(int argc, char **argv) {
  	 *		- Chunk size
  	 *		- Whether a checksum is included
 	 */
-	sprintf(buf, "%i %i %i", chunkSize, size, errorCheck);
+	sprintf(buf, "%10i %10i %5i", chunkSize, size, errorCheck);
+	printf("buf_length = %d\n", strlen(buf));
     write(serverFD, buf, strlen(buf));
-	sleep(3);
+
 
 	/*
 	 * Sending the files in chunks of size ChunkSize, either raw or with the
@@ -148,7 +149,7 @@ int main(int argc, char **argv) {
 		} else {
 			status = write(serverFD, buf, writeBytes);
 			total_sent += status;
-			printf("total_sent : %d, status : %d\n", total_sent, status);
+			//printf("total_sent : %d, status : %d\n", total_sent, status);
 			if (status < 0) perror("Sending Error:");
 		}
                 writeBytes = read(fileFD, buf, chunkSize);
