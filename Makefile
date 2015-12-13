@@ -3,6 +3,7 @@ all: code/recv-server.c code/transfer-client.c
 	mkdir bin tmp
 	gcc -o bin/recv code/recv-server.c -lbluetooth
 	gcc -o bin/transfer code/transfer-client.c -lbluetooth
+	gcc -o bin/forwd code/forwarder.c -lbluetooth
 
 server: code/recv-server.c
 	rm -rf tmp
