@@ -35,7 +35,7 @@
 #include <string.h>
 
 #define LISTEN_PORT		8888
-#define CONNECT_PORT 8889
+#define CONNECT_PORT 8888
 #define MAXBUF		1024
 
 int main(int Count, char *Strings[])

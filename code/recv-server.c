@@ -16,7 +16,7 @@
 
 unsigned short check_sum (unsigned short *buffer, int size); 
 
-#define LISTEN_PORT 8889
+#define LISTEN_PORT 8888
 
 int main(int argc, char **argv) {
 	/* 
