@@ -41,11 +41,16 @@
 int main(int Count, char *Strings[])
 {   int sockfd, serverFD, status, n;
 	struct sockaddr_in self, addr;
-	char buffer[MAXBUF];
+	int chunk_size;
+	char buffer;
 
-	if (Count != 2) {
-		printf("Usage %s <server address>\n", Strings[0]);
+	if (Count != 3) {
+		printf("Usage %s <server address> <chunk size>\n", Strings[0]);
 	}
+
+	chunk_size = atoi(Strings[2]);
+	buffer = (char *)calloc(chunk_size, sizeof(char));
+
 	/*---Create streaming socket---*/
     if ( (sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0 )
 	{
@@ -87,7 +92,7 @@ int main(int Count, char *Strings[])
 		printf("%s:%d connected\n", inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
 		serverFD = connect_to_server(Strings[1]);
 
-		while((n = recv(clientfd, buffer, MAXBUF, 0)) != 0) {
+		while((n = recv(clientfd, buffer, chunk_size, 0)) != 0) {
 
 			send(serverFD, buffer, n, 0);
 			if (status < 0) perror("Sending Error:");
