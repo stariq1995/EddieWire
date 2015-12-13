@@ -42,7 +42,7 @@ int main(int Count, char *Strings[])
 {   int sockfd, serverFD, status, n;
 	struct sockaddr_in self, addr;
 	int chunk_size;
-	char buffer;
+	char* buffer;
 
 	if (Count != 3) {
 		printf("Usage %s <server address> <chunk size>\n", Strings[0]);
