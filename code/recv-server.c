@@ -102,7 +102,7 @@ int main(int argc, char **argv) {
  		 *		- Chunk size
  		 *		- Whether a checksum is included
 		 */
-		readBytes = read(clientFD, temp_buf, 1024);
+		readBytes = read(clientFD, temp_buf, 27);
         if (readBytes == 0) continue; // Just an unread connection close
         if (readBytes < 0) perror ("First read error:");
         sscanf(temp_buf, "%i %i %i", &chunkSize, &insize, &errorCheck);
@@ -165,13 +165,13 @@ int main(int argc, char **argv) {
 		} else {
 		    while (readBytes > 0 && size < insize) {
 			readBytes = read(clientFD, buf, chunkSize);
-			printf("read bytes before loop : %d\n", readBytes);
-			while (readBytes != chunkSize){        
+//			printf("read bytes before loop : %d\n", readBytes);
+			while (readBytes < chunkSize && (insize - size - readBytes) > 0){        
                             readBytes += read(clientFD, buf+readBytes, chunkSize-readBytes);
-				printf("read bytes in loop:%d out of remaining: %d\n", readBytes, insize - size - readBytes);
+	//			printf("read bytes in loop:%d out of remaining: %d\n", readBytes, insize - size - readBytes);
                         } 
 			size += readBytes;
-			printf("size : %d, readbytes: %d\n", size, readBytes);
+		//	printf("size : %d, readbytes: %d\n", size, readBytes);
 		        status = fwrite(buf, sizeof(char), readBytes, ofile);
 		        if (status < 0) perror ("Error writing:");
 		    }
