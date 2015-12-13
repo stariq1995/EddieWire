@@ -163,13 +163,12 @@ int main(int argc, char **argv) {
 				}
 		    }
 		} else {
-		    while (readBytes > 0 && size < insize) {
+		    while (size < insize) {
 			readBytes = read(clientFD, buf, chunkSize);
-			printf("read bytes before loop : %d\n", readBytes);
-			while (readBytes != chunkSize){        
-                            readBytes += read(clientFD, buf+readBytes, chunkSize-readBytes);
-				printf("read bytes in loop:%d out of remaining: %d\n", readBytes, insize - size - readBytes);
-                        } 
+			// printf("read bytes before loop : %d\n", readBytes);
+			if (readBytes == 0) {
+				perror("closed connection before complete")
+			}
 			size += readBytes;
 			printf("size : %d, readbytes: %d\n", size, readBytes);
 		        status = fwrite(buf, sizeof(char), readBytes, ofile);
