@@ -115,6 +115,7 @@ int main(int argc, char **argv) {
 	 */
 	sprintf(buf, "%i %i %i", chunkSize, size, errorCheck);
     write(serverFD, buf, strlen(buf));
+	sleep(3);
 
 	/*
 	 * Sending the files in chunks of size ChunkSize, either raw or with the
@@ -124,6 +125,7 @@ int main(int argc, char **argv) {
 	writeBytes = read(fileFD, buf, chunkSize);
 	union csum checksum;
 	char replyBuf[10];
+	int total_sent = 0;
 	int x = writeBytes;
         while (writeBytes > 0) {
 		if (errorCheck) {
@@ -145,7 +147,8 @@ int main(int argc, char **argv) {
 			
 		} else {
 			status = write(serverFD, buf, writeBytes);
-			//printf("writeBytes : %d, status : %d\n", writeBytes, status);
+			total_sent += status;
+			printf("total_sent : %d, status : %d\n", total_sent, status);
 			if (status < 0) perror("Sending Error:");
 		}
                 writeBytes = read(fileFD, buf, chunkSize);
