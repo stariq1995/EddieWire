@@ -41,16 +41,13 @@
 int main(int Count, char *Strings[])
 {   int sockfd, serverFD, status, n;
 	struct sockaddr_in self, addr;
-	int chunk_size;
-	char* buffer;
 	char buf[MAXBUF];
 
-	if (Count != 3) {
-		printf("Usage %s <server address> <chunk size>\n", Strings[0]);
+	if (Count != 2) {
+		printf("Usage %s <server address>\n", Strings[0]);
 	}
 
-	chunk_size = atoi(Strings[2]);
-	//buffer = (char *)calloc(chunk_size, sizeof(char));
+
 
 	/*---Create streaming socket---*/
     if ( (sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0 )
