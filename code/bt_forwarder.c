@@ -44,43 +44,52 @@ int main(int Count, char *Strings[])
 
 	if (Count != 2) {
 		printf("Usage %s <server address>\n", Strings[0]);
+		return -1;
 	}
 
 
-	/*---Create streaming socket---*/
-    if ( (sockfd = socket(AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM)) < 0 )
-	{
-		perror("Socket");
-		exit(errno);
-	}
-
-	/*---Initialize address/port structure---*/
-	struct sockaddr_rc self;
-	bzero(&self, sizeof(self));
-	self.rc_family = AF_BLUETOOTH;
-	self.rc_channel = (uint8_t) 1;
-	self.rc_bdaddr = *BDADDR_ANY;
-
-	/*---Assign a port number to the socket---*/
-    if ( bind(sockfd, (struct sockaddr*)&self, sizeof(self)) != 0 )
-	{
-		perror("socket--bind");
-		exit(errno);
-	}
-
-
-
-	/*---Make it a "listening socket"---*/
-	if ( listen(sockfd, 20) != 0 )
-	{
-		perror("socket--listen");
-		exit(errno);
-	}
+	
 
 	/*---Forever... ---*/
 	while (1)
-	{	int clientfd;
+	{	
+		int clientfd;
 		struct sockaddr_rc client_addr;
+
+		/********* Make socket and listen ********/
+
+			/*---Create streaming socket---*/
+	    if ( (sockfd = socket(AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM)) < 0 )
+		{
+			perror("Socket");
+			exit(errno);
+		}
+
+		/*---Initialize address/port structure---*/
+		struct sockaddr_rc self;
+		bzero(&self, sizeof(self));
+		self.rc_family = AF_BLUETOOTH;
+		self.rc_channel = (uint8_t) 1;
+		self.rc_bdaddr = *BDADDR_ANY;
+
+		/*---Assign a port number to the socket---*/
+	    if ( bind(sockfd, (struct sockaddr*)&self, sizeof(self)) != 0 )
+		{
+			perror("socket--bind");
+			exit(errno);
+		}
+
+
+
+		/*---Make it a "listening socket"---*/
+		if ( listen(sockfd, 20) != 0 )
+		{
+			perror("socket--listen");
+			exit(errno);
+		}
+
+		/********************************************/
+		
 		
 		int addrlen=sizeof(client_addr);
 
@@ -98,6 +107,7 @@ int main(int Count, char *Strings[])
 		/*---Close data connection---*/
 		close(clientfd);
 		close(serverFD);
+		close(sockfd);
 	}
 
 	/*---Clean up (should never get here!)---*/
