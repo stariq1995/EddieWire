@@ -52,7 +52,7 @@ int main(int argc, char **argv) {
 		struct sockaddr_rc addr = { 0 };
         addr.rc_family = AF_BLUETOOTH;
         addr.rc_bdaddr = *BDADDR_ANY;
-        addr.rc_channel = (uint8_t) 2;
+        addr.rc_channel = (uint8_t) 1;
         bind(sock, (struct sockaddr *)&addr, sizeof(addr));
 	} else if(!strcmp(argv[1],"wifi")){
 		/* 
