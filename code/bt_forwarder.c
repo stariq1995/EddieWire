@@ -99,11 +99,12 @@ int main(int Count, char *Strings[])
 
 		while((n = recv(clientfd, buffer, MAXBUF, 0)) > 0) {
 
-			send(serverFD, buffer, n, 0);
+			status = send(serverFD, buffer, n, 0);
+			if (status < 0) perror("Sending Error:");
 			
 		}
 
-		if (n < 0) perror("Sending Error:");
+		if (n < 0) perror("Reading Error (Most likely connection closed with -1) :");
 
 		/*---Close data connection---*/
 		close(clientfd);
