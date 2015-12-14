@@ -40,7 +40,6 @@
 int main(int Count, char *Strings[])
 {   
 	int sockfd, serverFD, status, n;
-	struct sockaddr_in self, addr;
 	char buffer[MAXBUF];
 
 	if (Count != 2) {
@@ -56,6 +55,7 @@ int main(int Count, char *Strings[])
 	}
 
 	/*---Initialize address/port structure---*/
+	struct sockaddr_rc self;
 	bzero(&self, sizeof(self));
 	self.rc_family = AF_BLUETOOTH;
 	self.rc_channel = (uint8_t) 1;
@@ -80,13 +80,13 @@ int main(int Count, char *Strings[])
 	/*---Forever... ---*/
 	while (1)
 	{	int clientfd;
-		struct sockaddr_in client_addr;
+		struct sockaddr_rc client_addr;
 		
 		int addrlen=sizeof(client_addr);
 
 		/*---accept a connection (creating a data pipe)---*/
 		clientfd = accept(sockfd, (struct sockaddr*)&client_addr, &addrlen);
-		printf("%s:%d connected\n", inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
+		printf("connected to a client\n");
 		serverFD = connect_to_server(Strings[1]);
 
 		while((n = recv(clientfd, buffer, MAXBUF, 0)) != 0) {
