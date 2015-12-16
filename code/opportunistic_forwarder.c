@@ -1,10 +1,10 @@
 #include "common.h"
 
 
-#define CONNECT_PORT 8888
-#define LISTEN_PORT 8888
+#define FORWARDER_LISTEN 8888
+#define LISTEN_PORT 8889
 
-int receive_from_prev(int clientfd);
+int receive_from_prev(int clientFD, char *filename, int *cSize);
 int find_next();
 int connect_to_next();
 int send_to_next();
@@ -33,8 +33,27 @@ int open_listen_socket() {
 	return sock;
 }
 
+int open_listen_socket_f() {
+	int sock;
+
+	/* 
+	 * starting the socket with TCP	
+	 */
+	sock = socket(AF_INET, SOCK_STREAM, 0);
+
+	/*
+	 * bind socket to port 8888 of the first available
+	 * network interface
+	 */
+	struct sockaddr_in addr = { 0 };
+	addr.sin_addr.s_addr = htons(INADDR_ANY);
+	addr.sin_port = htons(FORWARDER_LISTEN);
+	bind(sock, (struct sockaddr *)&addr, sizeof(addr));
+	return sock;
+}
+
 int main(int argc, char **argv) {
-	int chunkSize, role;
+	int chunkSize, role, clientFD;
 	char filename[32] = {0};
 	char address[32] = {0};
 
@@ -46,7 +65,7 @@ int main(int argc, char **argv) {
         return -1;
     }
 
-    int role = atoi(argv[2]);
+    role = atoi(argv[2]);
     sprintf(logfile, "%s", argv[1]);
 
 
@@ -56,20 +75,20 @@ int main(int argc, char **argv) {
     }
 
     if (role == 1) {
-    	if (argc != 5) {
+    	if (argc != 6) {
     		printf("Usage: %s <log file name> 1 <filename> <server address> <chunk size>\n", argv[0]);
 	        return -1;
     	}
 
     	chunkSize = atoi(argv[5]);
-   		filename = sprintf(filename, "%s", argv[3]);
+   		sprintf(filename, "%s", argv[3]);
 
    		if (find_next(argv[3])) {
    			printf("Could not find the next node in the Network\n");
    			return -1;
    		}
 
-   		int serverFD = connect_to_next(argv[4]);
+   		int serverFD = connect_to_next_f(argv[4]);
    		int sent = send_to_next(serverFD, chunkSize, filename);
    		int dc = disconnect_from_next(serverFD);
    		printf("Sender operation complete\n");
@@ -82,7 +101,7 @@ int main(int argc, char **argv) {
 	        return -1;
     	}
 
-    	int listen_sock = open_listen_socket();
+    	int listen_sock = open_listen_socket_f();
 
 			/*
 			 * put socket into listening mode - THIS IS BLOCKING
@@ -95,7 +114,7 @@ int main(int argc, char **argv) {
 			printf("Listening...\n");
 			listen(listen_sock, 5);
 
-			clientFD = accept(sock, (struct  sockaddr *) NULL, NULL);
+			clientFD = accept(listen_sock, (struct  sockaddr *) NULL, NULL);
 			printf("New Client Instance.\n");
 			time_t current_time = time(NULL);
 			sprintf(filename, "tmp/f-%lu", (long unsigned)current_time);
@@ -138,7 +157,7 @@ int main(int argc, char **argv) {
 			printf("Listening...\n");
 			listen(listen_sock, 5);
 
-			clientFD = accept(sock, (struct  sockaddr *) NULL, NULL);
+			clientFD = accept(listen_sock, (struct  sockaddr *) NULL, NULL);
 			printf("New Client Instance.\n");
 			time_t current_time = time(NULL);
 			sprintf(filename, "tmp/f-%lu", (long unsigned)current_time);
@@ -200,7 +219,7 @@ int receive_from_prev(int clientFD, char *filename, int *cSize) {
 		}
 
 		size += readBytes;
-		printf("size : %d, readbytes: %d\n", size, readBytes);
+		//printf("size : %d, readbytes: %d\n", size, readBytes);
         status = fwrite(buf, sizeof(char), readBytes, ofile);
         if (status < 0) perror ("Error writing:");
 	}
@@ -221,12 +240,12 @@ int receive_from_prev(int clientFD, char *filename, int *cSize) {
 int find_next(char *address) {
 	return 0;
 	FILE *scan_results;
-	char[100] col1 = {0};
-	char[100] col2 = {0};
-	char[100] col3 = {0};
-	char[100] col4 = {0};
+	char col1[100] = {0};
+	char col2[100] = {0};
+	char col3[100] = {0};
+	char col4[100] = {0};
 	system("wpa_cli scan");
-	system("wpa_cli scan_results > temp_scan_results")
+	system("wpa_cli scan_results > temp_scan_results");
 	scan_results = fopen("temp_scan_results", "r");
 	if (scan_results == NULL){
 		printf("File not present!\n");
@@ -242,13 +261,32 @@ int find_next(char *address) {
 	return 1;
 }
 
+int connect_to_next_f(char *address) {
+	int serverFD, status;
+	
+	serverFD = socket(AF_INET, SOCK_STREAM, 0);
+	struct sockaddr_in addr = { 0 };
+	addr.sin_family = AF_INET;
+	addr.sin_port = htons(FORWARDER_LISTEN);
+	inet_pton(AF_INET, address, &addr.sin_addr);
+
+	status = connect(serverFD, (struct sockaddr *)&addr, sizeof(addr));
+	while (status < 0) {
+		perror("Connection failure, retrying in 1 sec..");
+		sleep(1);
+		serverFD = socket(AF_INET, SOCK_STREAM, 0);
+		status = connect(serverFD, (struct sockaddr *)&addr, sizeof(addr));
+	}
+	return serverFD;
+}
+
 int connect_to_next(char *address) {
 	int serverFD, status;
 	
 	serverFD = socket(AF_INET, SOCK_STREAM, 0);
 	struct sockaddr_in addr = { 0 };
 	addr.sin_family = AF_INET;
-	addr.sin_port = htons(CONNECT_PORT);
+	addr.sin_port = htons(LISTEN_PORT);
 	inet_pton(AF_INET, address, &addr.sin_addr);
 
 	status = connect(serverFD, (struct sockaddr *)&addr, sizeof(addr));
@@ -273,7 +311,7 @@ int send_to_next(int serverFD, int chunkSize, char *filename) {
 
 	buf = (char *)calloc(sizeof(char), chunkSize);
 	sprintf(buf, "%10i %10i", chunkSize, size);
-	printf("buf_length = %d\n", strlen(buf));
+	printf("buf_length = %d\n", (int)strlen(buf));
     write(serverFD, buf, strlen(buf));
 
 
@@ -307,7 +345,7 @@ int send_to_next(int serverFD, int chunkSize, char *filename) {
 
 int disconnect_from_next(int serverFD) {
 	if (close(serverFD) < 0) {
-		printf("Error while disconnecting.\n")
+		printf("Error while disconnecting.\n");
 		return -1;
 	}
 	return 0;

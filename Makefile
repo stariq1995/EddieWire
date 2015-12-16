@@ -14,3 +14,8 @@ server: code/recv-server.c
 client: code/transfer-client.c
 	gcc -o bin/transfer code/transfer-client.c -lbluetooth
 	
+
+opp: code/opportunistic_forwarder.c
+	rm -rf tmp
+	mkdir tmp
+	gcc -o bin/oppf code/opportunistic_forwarder.c
