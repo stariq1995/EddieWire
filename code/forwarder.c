@@ -98,6 +98,7 @@ int main(int Count, char *Strings[])
 
 		/*---Close data connection---*/
 		close(clientfd);
+		close(serverFD);
 	}
 
 	/*---Clean up (should never get here!)---*/

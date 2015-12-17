@@ -1,0 +1,17 @@
+#!/bin/sh
+if [ $# != 4 ] ; then
+ echo "$0 <log file> <address of server> <Chunk Size> <runs>"
+ exit
+fi
+
+for run in Z A C D E
+do
+    echo Trasferring files $run
+    for counter in $(seq 1 $4)
+    do
+        echo Sending $run-$counter
+        ./bin/oppf $1 1 tests/$run $2 $3
+        sleep 1
+    done 
+done
+echo done all.

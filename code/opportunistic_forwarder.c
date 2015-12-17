@@ -90,7 +90,7 @@ int main(int argc, char **argv) {
 
    		int serverFD = connect_to_next_f(argv[4]);
    		int sent = send_to_next(serverFD, chunkSize, filename);
-   		int dc = disconnect_from_next(serverFD);
+   		// int dc = disconnect_from_next(serverFD);
    		printf("Sender operation complete\n");
    		return 0;
     }
@@ -117,7 +117,7 @@ int main(int argc, char **argv) {
 			clientFD = accept(listen_sock, (struct  sockaddr *) NULL, NULL);
 			printf("New Client Instance.\n");
 			time_t current_time = time(NULL);
-			sprintf(filename, "tmp/f-%lu", (long unsigned)current_time);
+			sprintf(filename, "tmp/f-%lu.tmp", (long unsigned)current_time);
 
 			int r = receive_from_prev(clientFD, filename, &chunkSize);
 			printf("Completed receiving. Searching for next...\n");
@@ -129,12 +129,13 @@ int main(int argc, char **argv) {
 			printf("Found, connecting...\n");
 			int serverFD = connect_to_next(argv[3]);
 			printf("Connected, sending...\n");
+			printf("File: %s\n", filename);
 			int sent = send_to_next(serverFD, chunkSize, filename);
 			int dc = disconnect_from_next(serverFD);
 			printf("Sender operation complete\n");
-			char cmd[32] = {0};
-			sprintf(cmd, "rm -f %s", filename);
-			system(cmd);
+			// char cmd[32] = {0};
+			// sprintf(cmd, "rm -f %s", filename);
+			// system(cmd);
 		}
 	}
 
@@ -202,7 +203,7 @@ int receive_from_prev(int clientFD, char *filename, int *cSize) {
 	size = 0;
 
     log = fopen(logfile, "a");	
-    ofile = fopen(filename, "w");
+    ofile = fopen(filename, "a");
     if (ofile == NULL) perror ("Error Opening file:");
 	gettimeofday(&startTime, NULL);
 
@@ -213,13 +214,13 @@ int receive_from_prev(int clientFD, char *filename, int *cSize) {
 		readBytes = read(clientFD, buf, chunkSize);
 //		printf("read bytes before loop : %d\n", readBytes);
 
-		while (readBytes < chunkSize && (insize - size - readBytes) > 0){        
+		while (readBytes < chunkSize && (insize - size - readBytes) > 0 && readBytes > 0){        
 			readBytes += read(clientFD, buf+readBytes, chunkSize-readBytes);
 //			printf("read bytes in loop:%d out of remaining: %d\n", readBytes, insize - size - readBytes);
 		}
 
 		size += readBytes;
-		//printf("size : %d, readbytes: %d\n", size, readBytes);
+		printf("size : %d, readbytes: %d\n", size, readBytes);
         status = fwrite(buf, sizeof(char), readBytes, ofile);
         if (status < 0) perror ("Error writing:");
 	}
