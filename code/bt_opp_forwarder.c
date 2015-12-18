@@ -204,7 +204,7 @@ int receive_from_prev(int clientFD, char *filename, int *cSize) {
 		}
 
 		size += readBytes;
-		printf("size : %d, readbytes: %d\n", size, readBytes);
+		//printf("size : %d, readbytes: %d\n", size, readBytes);
         status = fwrite(buf, sizeof(char), readBytes, ofile);
         if (status < 0) perror ("Error writing:");
 	}
