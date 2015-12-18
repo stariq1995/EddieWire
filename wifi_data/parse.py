@@ -1,6 +1,6 @@
 
 
-with open("2-hops-2048-chunk.dat") as f:
+with open("3-hop-2048-chunk.dat") as f:
 	raw = f.readlines()
 	raw = [line.strip().split()[1:] for line in raw]
 	raw = [[int(size)/(1024.0 * 1024.0), float(time)/(1000000.0)] for [size, time] in raw]

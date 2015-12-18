@@ -19,3 +19,4 @@ opp: code/opportunistic_forwarder.c
 	rm -rf tmp
 	mkdir tmp
 	gcc -o bin/oppf code/opportunistic_forwarder.c
+	gcc -o bin/bt_oppf code/bt_opp_forwarder.c -lbluetooth
