@@ -92,6 +92,7 @@ int main(int argc, char **argv) {
    		int sent = send_to_next(serverFD, chunkSize, filename);
    		int dc = disconnect_from_next(serverFD);
    		printf("Sender operation complete\n");
+   		system("killall python");
    		return 0;
     }
 
