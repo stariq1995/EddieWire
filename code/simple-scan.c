@@ -14,7 +14,7 @@ int main(int argc, char **argv)
     int i;
     char addr[19] = { 0 };
     char name[248] = { 0 };
-
+	flags = IREQ_CACHE_FLUSH;
     dev_id = hci_get_route(NULL);
     sock = hci_open_dev( dev_id );
     if (dev_id < 0 || sock < 0) {
@@ -32,11 +32,7 @@ int main(int argc, char **argv)
 
     for (i = 0; i < num_rsp; i++) {
         ba2str(&(ii+i)->bdaddr, addr);
-        memset(name, 0, sizeof(name));
-        if (hci_read_remote_name(sock, &(ii+i)->bdaddr, sizeof(name), 
-            name, 0) < 0)
-        strcpy(name, "[unknown]");
-        printf("%s  %s\n", addr, name);
+        printf("%s\n", addr);
     }
 
     free( ii );
