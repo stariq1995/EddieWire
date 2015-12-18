@@ -62,7 +62,7 @@ int main(int argc, char **argv) {
 	        return -1;
     	}
 
-    	system("./code/discovery_on.sh");
+    	// system("./code/discovery_on.sh");
 
     	chunkSize = atoi(argv[5]);
    		sprintf(filename, "%s", argv[3]);
@@ -94,7 +94,7 @@ int main(int argc, char **argv) {
 
     	while (1) {
 
-			system("./code/discovery_on.sh");
+			// system("./code/discovery_on.sh");
 			printf("Listening...\n");
 			listen(listen_sock, 5);
 
@@ -138,7 +138,7 @@ int main(int argc, char **argv) {
 
     	while (1) {
 
-			system("./code/discovery_on.sh");
+			// system("./code/discovery_on.sh");
 			printf("Listening...\n");
 			listen(listen_sock, 5);
 
