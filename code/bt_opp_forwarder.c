@@ -1,5 +1,6 @@
 #include "common.h"
-
+#include <bluetooth/hci.h>
+#include <bluetooth/hci_lib.h>
 
 
 
@@ -219,51 +220,56 @@ int receive_from_prev(int clientFD, char *filename, int *cSize) {
     return 0;
 }
 
-int find_next(char *address) {
-	return 0;
+int scan(int len, char *find_addr) {
+    inquiry_info *ii = NULL;
+    int max_rsp, num_rsp;
+    int dev_id, sock, flags;
+    int i;
+    char addr[19] = { 0 };
+    char name[248] = { 0 };
+	flags = IREQ_CACHE_FLUSH;
+    dev_id = hci_get_route(NULL);
+    sock = hci_open_dev( dev_id );
+    if (dev_id < 0 || sock < 0) {
+        perror("opening socket");
+        exit(1);
+    }
 
-	struct timeval startTime, endTime;
-    double delay;
-    FILE *log;
+    max_rsp = 255;
+    flags = IREQ_CACHE_FLUSH;
+    ii = (inquiry_info*)malloc(max_rsp * sizeof(inquiry_info));
+    
+    num_rsp = hci_inquiry(dev_id, len, max_rsp, NULL, &ii, flags);
+    if( num_rsp < 0 ) perror("hci_inquiry");
 
-	FILE *scan_results;
-	char col1[100] = {0};
-	char col2[100] = {0};
-	char col3[100] = {0};
-	char col4[100] = {0};
-	log = fopen(logfile, "a");
-	gettimeofday(&startTime, NULL);
-	system("wpa_cli scan");
-	system("wpa_cli scan_results > temp_scan_results");
-	scan_results = fopen("temp_scan_results", "r");
-	if (scan_results == NULL){
-		printf("File not present!\n");
-		exit(0);
-	}
-	while(fscanf(scan_results, "%s %s %s %s", col1, col2, col3, col4) == 4) {
-		if (!strcmp(col4, "EdiNet")){
-			printf("Found %s at Mac : %s\n", col1, col4);
-			fclose(scan_results);
-			system("rm -rf temp_scan_results");
+    for (i = 0; i < num_rsp; i++) {
+        ba2str(&(ii+i)->bdaddr, addr);
+        printf("%s\n", addr);
+        if (!strcmp(find_addr, addr)){
+        	return 1;
+        }
+    }
 
-			gettimeofday(&endTime, NULL);
-		    delay = ((endTime.tv_sec * 1000000) + (endTime.tv_usec)) - ((startTime.tv_sec * 1000000) + (startTime.tv_usec));
-		    fprintf(log, "Scan Delay : %f\n", delay);
-			fclose(log);
+    free( ii );
+    close( sock );
+    return 0;
+}
+
+int find_next(char *addr)
+{
+	int i;
+
+	for (i = 3; i < 9; i++) {
+		if (scan(i, addr)) {
 			return 0;
 		}
 	}
-	printf("Adhoc Network not found\n");
-	fclose(scan_results);
-	system("rm -rf temp_scan_results");
 
-	gettimeofday(&endTime, NULL);
-	
-    delay = ((endTime.tv_sec * 1000000) + (endTime.tv_usec)) - ((startTime.tv_sec * 1000000) + (startTime.tv_usec));
-    fprintf(log, "Scan Delay : %f\n", delay);
-	fclose(log);
-	
-	return 1;
+	while (1) {
+		if (scan(i, addr)) {
+			return 0;
+		}
+	}
 }
 
 int connect_to_next(char *address) {
