@@ -14,7 +14,9 @@ set yrange [:190]
 plot 	"delay_data.dat" using 1:2 title col with linespoints, \
  	"delay_data.dat" using 1:3 title col with linespoints, \
  	"delay_data.dat" using 1:4 title col with linespoints, \
- 	"delay_data.dat" using 1:5 title col with linespoints
+ 	"delay_data.dat" using 1:5 title col with linespoints, \
+ 	"delay_data.dat" using 1:6 title col with linespoints, \
+ 	"delay_data.dat" using 1:7 title col with linespoints
 set yrange [:10000]
 set logscale y
 set output "Edison-dataTransfer_logscale.eps"

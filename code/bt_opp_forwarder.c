@@ -1,8 +1,7 @@
 #include "common.h"
 
 
-#define FORWARDER_LISTEN 8888
-#define LISTEN_PORT 8888
+
 
 int receive_from_prev(int clientFD, char *filename, int *cSize);
 int find_next();
@@ -20,34 +19,16 @@ int open_listen_socket() {
 	/* 
 	 * starting the socket with TCP	
 	 */
-	sock = socket(AF_INET, SOCK_STREAM, 0);
+	sock = socket(AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM);
 
 	/*
 	 * bind socket to port 8888 of the first available
 	 * network interface
 	 */
-	struct sockaddr_in addr = { 0 };
-	addr.sin_addr.s_addr = htons(INADDR_ANY);
-	addr.sin_port = htons(LISTEN_PORT);
-	bind(sock, (struct sockaddr *)&addr, sizeof(addr));
-	return sock;
-}
-
-int open_listen_socket_f() {
-	int sock;
-
-	/* 
-	 * starting the socket with TCP	
-	 */
-	sock = socket(AF_INET, SOCK_STREAM, 0);
-
-	/*
-	 * bind socket to port 8888 of the first available
-	 * network interface
-	 */
-	struct sockaddr_in addr = { 0 };
-	addr.sin_addr.s_addr = htons(INADDR_ANY);
-	addr.sin_port = htons(FORWARDER_LISTEN);
+	struct sockaddr_rc addr = { 0 };
+	addr.rc_family = AF_BLUETOOTH;
+	addr.rc_channel = (uint8_t) 1;
+	addr.rc_bdaddr = *BDADDR_ANY;
 	bind(sock, (struct sockaddr *)&addr, sizeof(addr));
 	return sock;
 }
@@ -87,8 +68,8 @@ int main(int argc, char **argv) {
    			printf("Could not find the next node in the Network\n");
    			return -1;
    		}
-   		find_next(argv[3]);
-   		int serverFD = connect_to_next_f(argv[4]);
+
+   		int serverFD = connect_to_next(argv[4]);
    		int sent = send_to_next(serverFD, chunkSize, filename);
    		int dc = disconnect_from_next(serverFD);
    		printf("Sender operation complete\n");
@@ -101,7 +82,7 @@ int main(int argc, char **argv) {
 	        return -1;
     	}
 
-    	int listen_sock = open_listen_socket_f();
+    	int listen_sock = open_listen_socket();
 
 			/*
 			 * put socket into listening mode - THIS IS BLOCKING
@@ -220,7 +201,7 @@ int receive_from_prev(int clientFD, char *filename, int *cSize) {
 		}
 
 		size += readBytes;
-		// printf("size : %d, readbytes: %d\n", size, readBytes);
+		printf("size : %d, readbytes: %d\n", size, readBytes);
         status = fwrite(buf, sizeof(char), readBytes, ofile);
         if (status < 0) perror ("Error writing:");
 	}
@@ -239,6 +220,7 @@ int receive_from_prev(int clientFD, char *filename, int *cSize) {
 }
 
 int find_next(char *address) {
+	return 0;
 
 	struct timeval startTime, endTime;
     double delay;
@@ -251,30 +233,29 @@ int find_next(char *address) {
 	char col4[100] = {0};
 	log = fopen(logfile, "a");
 	gettimeofday(&startTime, NULL);
-	system("python ./code/scan_and_find.py");
-	// system("wpa_cli scan");
-	// system("wpa_cli scan_results > temp_scan_results");
-	// scan_results = fopen("temp_scan_results", "r");
-	// if (scan_results == NULL){
-	// 	printf("File not present!\n");
-	// 	exit(0);
-	// }
-	// while(fscanf(scan_results, "%s %s %s %s", col1, col2, col3, col4) == 4) {
-	// 	if (!strcmp(col4, "EdiNet")){
-	// 		printf("Found %s at Mac : %s\n", col1, col4);
-	// 		fclose(scan_results);
-	// 		system("rm -rf temp_scan_results");
+	system("wpa_cli scan");
+	system("wpa_cli scan_results > temp_scan_results");
+	scan_results = fopen("temp_scan_results", "r");
+	if (scan_results == NULL){
+		printf("File not present!\n");
+		exit(0);
+	}
+	while(fscanf(scan_results, "%s %s %s %s", col1, col2, col3, col4) == 4) {
+		if (!strcmp(col4, "EdiNet")){
+			printf("Found %s at Mac : %s\n", col1, col4);
+			fclose(scan_results);
+			system("rm -rf temp_scan_results");
 
-	// 		gettimeofday(&endTime, NULL);
-	// 	    delay = ((endTime.tv_sec * 1000000) + (endTime.tv_usec)) - ((startTime.tv_sec * 1000000) + (startTime.tv_usec));
-	// 	    fprintf(log, "Scan Delay : %f\n", delay);
-	// 		fclose(log);
-	// 		return 0;
-	// 	}
-	// }
-	// printf("Adhoc Network not found\n");
-	// fclose(scan_results);
-	// system("rm -rf temp_scan_results");
+			gettimeofday(&endTime, NULL);
+		    delay = ((endTime.tv_sec * 1000000) + (endTime.tv_usec)) - ((startTime.tv_sec * 1000000) + (startTime.tv_usec));
+		    fprintf(log, "Scan Delay : %f\n", delay);
+			fclose(log);
+			return 0;
+		}
+	}
+	printf("Adhoc Network not found\n");
+	fclose(scan_results);
+	system("rm -rf temp_scan_results");
 
 	gettimeofday(&endTime, NULL);
 	
@@ -282,39 +263,7 @@ int find_next(char *address) {
     fprintf(log, "Scan Delay : %f\n", delay);
 	fclose(log);
 	
-	return 0;
-}
-
-int connect_to_next_f(char *address) {
-	int serverFD, status;
-	
-	struct timeval startTime, endTime;
-	double delay;
-	FILE *log;
-	
-	serverFD = socket(AF_INET, SOCK_STREAM, 0);
-	struct sockaddr_in addr = { 0 };
-	addr.sin_family = AF_INET;
-	addr.sin_port = htons(FORWARDER_LISTEN);
-	inet_pton(AF_INET, address, &addr.sin_addr);
-	
-	log = fopen(logfile, "a");
-	gettimeofday(&startTime, NULL);
-
-	status = connect(serverFD, (struct sockaddr *)&addr, sizeof(addr));
-	while (status < 0) {
-		perror("Connection failure, retrying in 1 sec..");
-		sleep(1);
-		serverFD = socket(AF_INET, SOCK_STREAM, 0);
-		status = connect(serverFD, (struct sockaddr *)&addr, sizeof(addr));
-	}
-	
-	gettimeofday(&endTime, NULL);
-    delay = ((endTime.tv_sec * 1000000) + (endTime.tv_usec)) - ((startTime.tv_sec * 1000000) + (startTime.tv_usec));
-    fprintf(log, "Connect Delay : %f\n", delay);
-	fclose(log);
-	
-	return serverFD;
+	return 1;
 }
 
 int connect_to_next(char *address) {
@@ -323,11 +272,11 @@ int connect_to_next(char *address) {
 	double delay;
 	FILE *log;
 	
-	serverFD = socket(AF_INET, SOCK_STREAM, 0);
-	struct sockaddr_in addr = { 0 };
-	addr.sin_family = AF_INET;
-	addr.sin_port = htons(LISTEN_PORT);
-	inet_pton(AF_INET, address, &addr.sin_addr);
+	serverFD = socket(AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM);
+	struct sockaddr_rc addr = { 0 };
+	addr.rc_family = AF_BLUETOOTH;
+	addr.rc_channel = (uint8_t) 1;
+	str2ba(address, &addr.rc_bdaddr);
 
 	log = fopen(logfile, "a");
 	gettimeofday(&startTime, NULL);
@@ -336,7 +285,7 @@ int connect_to_next(char *address) {
 	while (status < 0) {
 		perror("Connection failure, retrying in 1 sec..");
 		sleep(1);
-		serverFD = socket(AF_INET, SOCK_STREAM, 0);
+		serverFD = socket(AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM);
 		status = connect(serverFD, (struct sockaddr *)&addr, sizeof(addr));
 	}
 
