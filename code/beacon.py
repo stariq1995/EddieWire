@@ -1,6 +1,7 @@
 import subprocess as sp
 import time
 from socket import *
+import sys
 
 BEACON_INTERVAL = 1
 BEACON_PORT = 8000
@@ -9,9 +10,10 @@ ip_list = ['192.168.1.1', '192.168.1.10', '192.168.1.11', '192.168.1.12']
 
 
 def getIP():
-	proc = sp.Popen('ifconfig wlan0 | grep "inet addr"')
+	proc = sp.Popen('ifconfig wlan0 | grep "inet addr"', stdout=sp.PIPE, shell=True,)
 	out = proc.communicate()[0]
-	ip = out.split()[0].split(':')[1]
+	print out
+	ip = out.split()[1].split(':')[1]
 	return ip
 
 def beacon(ips, my_ip):

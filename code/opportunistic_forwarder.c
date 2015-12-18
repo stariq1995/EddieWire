@@ -255,7 +255,7 @@ int find_next(char *address) {
 	log = fopen(logfile, "a");
 	gettimeofday(&startTime, NULL);
 	char cmd[100] = {0};
-	sprintf(cmd, "./code/scan_wifi.py %s", address)
+	sprintf(cmd, "./code/scan_wifi.py %s", address);
 	system(cmd);
 	// system("wpa_cli scan");
 	// system("wpa_cli scan_results > temp_scan_results");
