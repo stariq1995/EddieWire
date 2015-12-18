@@ -79,6 +79,7 @@ int main(int argc, char **argv) {
     		printf("Usage: %s <log file name> 1 <filename> <server address> <chunk size>\n", argv[0]);
 	        return -1;
     	}
+    	system("python code/beacon.py &");
 
     	chunkSize = atoi(argv[5]);
    		sprintf(filename, "%s", argv[3]);
@@ -100,6 +101,7 @@ int main(int argc, char **argv) {
     		printf("Usage: %s <log file name> 2 <server address>\n", argv[0]);
 	        return -1;
     	}
+    	system("python code/beacon.py &");
 
     	int listen_sock = open_listen_socket_f();
 
@@ -144,8 +146,9 @@ int main(int argc, char **argv) {
 			printf("Usage: %s <log file name> 3\n", argv[0]);
 	        return -1;
 		}
+		system("python code/beacon.py &");
 
-		    	int listen_sock = open_listen_socket();
+    	int listen_sock = open_listen_socket();
 
 			/*
 			 * put socket into listening mode - THIS IS BLOCKING
@@ -244,14 +247,16 @@ int find_next(char *address) {
     double delay;
     FILE *log;
 
-	FILE *scan_results;
-	char col1[100] = {0};
-	char col2[100] = {0};
-	char col3[100] = {0};
-	char col4[100] = {0};
+	// FILE *scan_results;
+	// char col1[100] = {0};
+	// char col2[100] = {0};
+	// char col3[100] = {0};
+	// char col4[100] = {0};
 	log = fopen(logfile, "a");
 	gettimeofday(&startTime, NULL);
-	system("python ./code/scan_and_find.py");
+	char cmd[100] = {0};
+	sprintf(cmd, "./code/scan_wifi.py %s", address)
+	system(cmd);
 	// system("wpa_cli scan");
 	// system("wpa_cli scan_results > temp_scan_results");
 	// scan_results = fopen("temp_scan_results", "r");
