@@ -259,16 +259,30 @@ int scan(int len, char *find_addr) {
 
 int find_next(char *addr)
 {
+	struct timeval startTime, endTime;
+	double delay;
+	FILE *log;
 	int i;
 
-	for (i = 3; i < 9; i++) {
+	log = fopen(logfile, "a");
+	gettimeofday(&startTime, NULL);
+
+	for (i = 2; i < 9; i++) {
 		if (scan(i, addr)) {
+			gettimeofday(&endTime, NULL);
+		    delay = ((endTime.tv_sec * 1000000) + (endTime.tv_usec)) - ((startTime.tv_sec * 1000000) + (startTime.tv_usec));
+		    fprintf(log, "Scan Delay : %f\n", delay);
+			fclose(log);
 			return 0;
 		}
 	}
 
 	while (1) {
 		if (scan(i, addr)) {
+			gettimeofday(&endTime, NULL);
+		    delay = ((endTime.tv_sec * 1000000) + (endTime.tv_usec)) - ((startTime.tv_sec * 1000000) + (startTime.tv_usec));
+		    fprintf(log, "Scan Delay : %f\n", delay);
+			fclose(log);
 			return 0;
 		}
 	}
