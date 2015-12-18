@@ -220,7 +220,7 @@ int receive_from_prev(int clientFD, char *filename, int *cSize) {
 		}
 
 		size += readBytes;
-		printf("size : %d, readbytes: %d\n", size, readBytes);
+		// printf("size : %d, readbytes: %d\n", size, readBytes);
         status = fwrite(buf, sizeof(char), readBytes, ofile);
         if (status < 0) perror ("Error writing:");
 	}
@@ -239,7 +239,6 @@ int receive_from_prev(int clientFD, char *filename, int *cSize) {
 }
 
 int find_next(char *address) {
-	return 0;
 
 	struct timeval startTime, endTime;
     double delay;
@@ -252,29 +251,30 @@ int find_next(char *address) {
 	char col4[100] = {0};
 	log = fopen(logfile, "a");
 	gettimeofday(&startTime, NULL);
-	system("wpa_cli scan");
-	system("wpa_cli scan_results > temp_scan_results");
-	scan_results = fopen("temp_scan_results", "r");
-	if (scan_results == NULL){
-		printf("File not present!\n");
-		exit(0);
-	}
-	while(fscanf(scan_results, "%s %s %s %s", col1, col2, col3, col4) == 4) {
-		if (!strcmp(col4, "EdiNet")){
-			printf("Found %s at Mac : %s\n", col1, col4);
-			fclose(scan_results);
-			system("rm -rf temp_scan_results");
+	system("python ./code/scan_and_find.py");
+	// system("wpa_cli scan");
+	// system("wpa_cli scan_results > temp_scan_results");
+	// scan_results = fopen("temp_scan_results", "r");
+	// if (scan_results == NULL){
+	// 	printf("File not present!\n");
+	// 	exit(0);
+	// }
+	// while(fscanf(scan_results, "%s %s %s %s", col1, col2, col3, col4) == 4) {
+	// 	if (!strcmp(col4, "EdiNet")){
+	// 		printf("Found %s at Mac : %s\n", col1, col4);
+	// 		fclose(scan_results);
+	// 		system("rm -rf temp_scan_results");
 
-			gettimeofday(&endTime, NULL);
-		    delay = ((endTime.tv_sec * 1000000) + (endTime.tv_usec)) - ((startTime.tv_sec * 1000000) + (startTime.tv_usec));
-		    fprintf(log, "Scan Delay : %f\n", delay);
-			fclose(log);
-			return 0;
-		}
-	}
-	printf("Adhoc Network not found\n");
-	fclose(scan_results);
-	system("rm -rf temp_scan_results");
+	// 		gettimeofday(&endTime, NULL);
+	// 	    delay = ((endTime.tv_sec * 1000000) + (endTime.tv_usec)) - ((startTime.tv_sec * 1000000) + (startTime.tv_usec));
+	// 	    fprintf(log, "Scan Delay : %f\n", delay);
+	// 		fclose(log);
+	// 		return 0;
+	// 	}
+	// }
+	// printf("Adhoc Network not found\n");
+	// fclose(scan_results);
+	// system("rm -rf temp_scan_results");
 
 	gettimeofday(&endTime, NULL);
 	
@@ -282,7 +282,7 @@ int find_next(char *address) {
     fprintf(log, "Scan Delay : %f\n", delay);
 	fclose(log);
 	
-	return 1;
+	return 0;
 }
 
 int connect_to_next_f(char *address) {
