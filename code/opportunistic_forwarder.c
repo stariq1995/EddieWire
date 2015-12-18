@@ -87,7 +87,7 @@ int main(int argc, char **argv) {
    			printf("Could not find the next node in the Network\n");
    			return -1;
    		}
-
+   		find_next(argv[3]);
    		int serverFD = connect_to_next_f(argv[4]);
    		int sent = send_to_next(serverFD, chunkSize, filename);
    		int dc = disconnect_from_next(serverFD);
