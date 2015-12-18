@@ -247,39 +247,13 @@ int find_next(char *address) {
     double delay;
     FILE *log;
 
-	// FILE *scan_results;
-	// char col1[100] = {0};
-	// char col2[100] = {0};
-	// char col3[100] = {0};
-	// char col4[100] = {0};
+
 	log = fopen(logfile, "a");
 	gettimeofday(&startTime, NULL);
 	char cmd[100] = {0};
 	sprintf(cmd, "./code/scan_wifi.py %s", address);
 	system(cmd);
-	// system("wpa_cli scan");
-	// system("wpa_cli scan_results > temp_scan_results");
-	// scan_results = fopen("temp_scan_results", "r");
-	// if (scan_results == NULL){
-	// 	printf("File not present!\n");
-	// 	exit(0);
-	// }
-	// while(fscanf(scan_results, "%s %s %s %s", col1, col2, col3, col4) == 4) {
-	// 	if (!strcmp(col4, "EdiNet")){
-	// 		printf("Found %s at Mac : %s\n", col1, col4);
-	// 		fclose(scan_results);
-	// 		system("rm -rf temp_scan_results");
 
-	// 		gettimeofday(&endTime, NULL);
-	// 	    delay = ((endTime.tv_sec * 1000000) + (endTime.tv_usec)) - ((startTime.tv_sec * 1000000) + (startTime.tv_usec));
-	// 	    fprintf(log, "Scan Delay : %f\n", delay);
-	// 		fclose(log);
-	// 		return 0;
-	// 	}
-	// }
-	// printf("Adhoc Network not found\n");
-	// fclose(scan_results);
-	// system("rm -rf temp_scan_results");
 
 	gettimeofday(&endTime, NULL);
 	
