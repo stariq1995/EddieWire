@@ -67,7 +67,7 @@ int main(int argc, char **argv) {
     	chunkSize = atoi(argv[5]);
    		sprintf(filename, "%s", argv[3]);
 
-   		if (find_next(argv[3])) {
+   		if (find_next(argv[4])) {
    			printf("Could not find the next node in the Network\n");
    			return -1;
    		}
@@ -246,7 +246,7 @@ int scan(int len, char *find_addr) {
 
     for (i = 0; i < num_rsp; i++) {
         ba2str(&(ii+i)->bdaddr, addr);
-        printf("%s\n", addr);
+        printf("%s == %s\n", addr, find_addr);
         if (!strcmp(find_addr, addr)){
         	return 1;
         }
