@@ -62,7 +62,6 @@ int main(int argc, char **argv) {
 	        return -1;
     	}
 
-    	// system("./code/discovery_on.sh");
 
     	chunkSize = atoi(argv[5]);
    		sprintf(filename, "%s", argv[3]);
@@ -84,6 +83,8 @@ int main(int argc, char **argv) {
     		printf("Usage: %s <log file name> 2 <server address>\n", argv[0]);
 	        return -1;
     	}
+
+    	system("hciconfig hci0 piscan");
 
     	int listen_sock = open_listen_socket();
 
@@ -128,7 +129,7 @@ int main(int argc, char **argv) {
 			printf("Usage: %s <log file name> 3\n", argv[0]);
 	        return -1;
 		}
-
+			system("hciconfig hci0 piscan");
 		    	int listen_sock = open_listen_socket();
 
 			/*
@@ -257,36 +258,59 @@ int scan(int len, char *find_addr) {
     return 0;
 }
 
-int find_next(char *addr)
-{
+int find_next(char *address) {
+
 	struct timeval startTime, endTime;
-	double delay;
-	FILE *log;
-	int i;
+    double delay;
+    FILE *log;
+
 
 	log = fopen(logfile, "a");
 	gettimeofday(&startTime, NULL);
+	char cmd[100] = {0};
+	sprintf(cmd, "./code/bt_find.py %s", address);
+	system(cmd);
 
-	for (i = 2; i < 9; i++) {
-		if (scan(i, addr)) {
-			gettimeofday(&endTime, NULL);
-		    delay = ((endTime.tv_sec * 1000000) + (endTime.tv_usec)) - ((startTime.tv_sec * 1000000) + (startTime.tv_usec));
-		    fprintf(log, "Scan Delay : %f\n", delay);
-			fclose(log);
-			return 0;
-		}
-	}
 
-	while (1) {
-		if (scan(i, addr)) {
-			gettimeofday(&endTime, NULL);
-		    delay = ((endTime.tv_sec * 1000000) + (endTime.tv_usec)) - ((startTime.tv_sec * 1000000) + (startTime.tv_usec));
-		    fprintf(log, "Scan Delay : %f\n", delay);
-			fclose(log);
-			return 0;
-		}
-	}
+	gettimeofday(&endTime, NULL);
+	
+    delay = ((endTime.tv_sec * 1000000) + (endTime.tv_usec)) - ((startTime.tv_sec * 1000000) + (startTime.tv_usec));
+    fprintf(log, "Scan Delay : %f\n", delay);
+	fclose(log);
+	
+	return 0;
 }
+
+// int find_next(char *addr)
+// {
+// 	struct timeval startTime, endTime;
+// 	double delay;
+// 	FILE *log;
+// 	int i;
+
+// 	log = fopen(logfile, "a");
+// 	gettimeofday(&startTime, NULL);
+
+// 	for (i = 2; i < 9; i++) {
+// 		if (scan(i, addr)) {
+// 			gettimeofday(&endTime, NULL);
+// 		    delay = ((endTime.tv_sec * 1000000) + (endTime.tv_usec)) - ((startTime.tv_sec * 1000000) + (startTime.tv_usec));
+// 		    fprintf(log, "Scan Delay : %f\n", delay);
+// 			fclose(log);
+// 			return 0;
+// 		}
+// 	}
+
+// 	while (1) {
+// 		if (scan(i, addr)) {
+// 			gettimeofday(&endTime, NULL);
+// 		    delay = ((endTime.tv_sec * 1000000) + (endTime.tv_usec)) - ((startTime.tv_sec * 1000000) + (startTime.tv_usec));
+// 		    fprintf(log, "Scan Delay : %f\n", delay);
+// 			fclose(log);
+// 			return 0;
+// 		}
+// 	}
+// }
 
 int connect_to_next(char *address) {
 	int serverFD, status;
