@@ -10,6 +10,7 @@ import struct
 import bluetooth._bluetooth as bluez
 
 FOUND = False
+ADDR = ''
 
 def printpacket(pkt):
     for c in pkt:
@@ -75,6 +76,7 @@ def write_inquiry_mode(sock, mode):
 
 def device_inquiry_with_with_rssi(sock):
     global FOUND
+    global ADDR
     # save current filter
     old_filter = sock.getsockopt( bluez.SOL_HCI, bluez.HCI_FILTER, 14)
 
@@ -136,13 +138,11 @@ def device_inquiry_with_with_rssi(sock):
 
 def main():
     global FOUND
+    global ADDR
     if len(sys.argv) < 2:
         usage()
     else:
-        addr
-
-        with open(FILE_NAME % distance, 'a') as f:
-            pass
+        ADDR = sys.argv[1]
 
         dev_id = 0
         try:
@@ -173,7 +173,7 @@ def main():
             print("result: %d" % result)
 
         while not FOUND:
-            device_inquiry_with_with_rssi()
+            device_inquiry_with_with_rssi(sock)
 
 def usage():
     print "Usage ./bt_find.py <%s>" % 'address'
