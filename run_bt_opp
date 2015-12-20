@@ -11,7 +11,7 @@ do
     for counter in $(seq 1 $4)
     do
         echo Sending $run-$counter
-        ./bin/oppf $1 1 tests/$run $2 $3
+        ./bin/bt_oppf $1 1 tests/$run $2 $3
         sleep 500
     done 
 done
